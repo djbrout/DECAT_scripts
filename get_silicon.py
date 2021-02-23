@@ -29,8 +29,12 @@ def get_field_center_for_target_on_specific_ccd(ras,decs,ccds,extra_offset_in_ar
 
 def is_on_silicon(RApoints,DECpoints,RAcands,DECcands):
     ccds = []
+    raminarcsecs = []
+    decminarcsecs = []
     for RApoint,DECpoint,RAcand,DECcand in zip(RApoints,DECpoints,RAcands,DECcands):
         found = np.nan
+        raminarcsec = np.nan
+        decminarcsec = np.nan
         for ccd in range(1,63):
             ww = c1_corners['CCD'] == ccd
             maxra = np.max(c1_corners['RA'][ww].to_numpy())+RApoint-c1_field_center_ra
@@ -39,6 +43,11 @@ def is_on_silicon(RApoints,DECpoints,RAcands,DECcands):
             mindec = np.min(c1_corners['Dec'][ww].to_numpy())+DECpoint-c1_field_center_dec
             if (RAcand < maxra) & (RAcand > minra) & (DECcand < maxdec) & (DECcand > mindec):
                 found = copy(ccd)
+                raminarcsec = min([maxra-RAcand,RAcand-minra])*3600
+                decminarcsec =	min([maxdec-DECcand,DECcand-mindec])*3600
+
         ccds.append(found)
-    return np.array(ccds)
+        raminarcsecs.append(raminarcsec)
+        decminarcsecs.append(decminarcsec)
+    return np.array(ccds),np.array(raminarcsecs),np.array(decminarcsecs)
 
